@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DT Tracker Mockup Generator</title>
+    <title>Order Tracker Configurator</title>
     <style>
         /* Base Variables & Reset */
         :root {
             --brand-color: #0f172a;
-            --brand-accent: #3b82f6;
-            --bg-light: #f8fafc;
+            --brand-accent: #2563eb;
+            --bg-light: #f1f5f9;
             --text-dark: #1e293b;
             --text-muted: #64748b;
         }
@@ -18,56 +18,63 @@
             box-sizing: border-box;
             margin: 0;
             padding: 0;
-            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
         }
 
         body {
             background-color: var(--bg-light);
             color: var(--text-dark);
-            padding-bottom: 60px; /* Space for footer */
+            padding-bottom: 70px; /* Prevents content from hiding behind footer */
             min-height: 100vh;
             display: flex;
             flex-direction: column;
         }
 
         /* =========================================
-           VIEW 1: SETUP SCREEN (Generate URL)
+           VIEW 1: LANDING PAGE (Generate URL)
            ========================================= */
-        #setup-view {
+        #landing-view {
             display: flex;
             align-items: center;
             justify-content: center;
             flex-grow: 1;
-            min-height: calc(100vh - 60px);
-            background: linear-gradient(135deg, #e2e8f0 0%, #f8fafc 100%);
             padding: 2rem;
+            background: linear-gradient(135deg, #e2e8f0 0%, #f8fafc 100%);
         }
 
-        .setup-card {
+        .config-card {
             background: #ffffff;
             width: 100%;
-            max-width: 600px;
+            max-width: 650px;
             padding: 2.5rem;
             border-radius: 12px;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+        }
+
+        .config-card h1 {
+            font-size: 1.8rem;
+            margin-bottom: 0.5rem;
+            color: var(--brand-color);
             text-align: center;
         }
 
-        .setup-card h1 {
-            font-size: 1.75rem;
-            margin-bottom: 0.5rem;
-            color: var(--brand-color);
+        .config-card p.subtitle {
+            color: var(--text-muted);
+            margin-bottom: 2rem;
+            text-align: center;
+            font-size: 0.95rem;
         }
 
-        .setup-card p {
-            color: var(--text-muted);
-            margin-bottom: 1.5rem;
+        label {
+            font-weight: 600;
             font-size: 0.95rem;
+            display: block;
+            margin-bottom: 0.5rem;
         }
 
         textarea {
             width: 100%;
-            height: 150px;
+            height: 160px;
             padding: 1rem;
             border: 2px solid #e2e8f0;
             border-radius: 8px;
@@ -76,75 +83,86 @@
             resize: vertical;
             margin-bottom: 1.5rem;
             transition: border-color 0.2s;
+            background-color: #f8fafc;
         }
 
         textarea:focus {
             outline: none;
             border-color: var(--brand-accent);
+            background-color: #ffffff;
         }
 
-        .btn-primary {
+        .btn-generate {
             background-color: var(--brand-accent);
             color: white;
             border: none;
-            padding: 0.875rem 2rem;
+            padding: 1rem 2rem;
             font-size: 1.1rem;
             font-weight: 600;
             border-radius: 8px;
             cursor: pointer;
             transition: background 0.2s, transform 0.1s;
             width: 100%;
+            display: block;
         }
 
-        .btn-primary:hover {
-            background-color: #2563eb;
+        .btn-generate:hover {
+            background-color: #1d4ed8;
         }
 
-        .btn-primary:active {
+        .btn-generate:active {
             transform: scale(0.98);
         }
 
-        /* Generated URL Section */
-        #url-result {
+        /* Result Box styling */
+        #result-box {
             display: none;
-            margin-top: 1.5rem;
-            padding-top: 1.5rem;
-            border-top: 1px solid #e2e8f0;
-            text-align: left;
+            margin-top: 2rem;
+            padding: 1.5rem;
+            background-color: #eff6ff;
+            border: 1px solid #bfdbfe;
+            border-radius: 8px;
         }
 
-        #url-result label {
-            display: block;
-            font-size: 0.9rem;
-            font-weight: 600;
+        #result-box h3 {
+            color: #1e3a8a;
+            font-size: 1rem;
             margin-bottom: 0.5rem;
-            color: var(--text-dark);
         }
 
-        .url-box {
+        .link-container {
             display: flex;
+            flex-direction: column;
             gap: 10px;
         }
 
-        .url-box input {
-            flex-grow: 1;
-            padding: 0.75rem;
-            border: 1px solid #e2e8f0;
+        /* The actual clickable link */
+        .generated-link {
+            word-break: break-all;
+            color: var(--brand-accent);
+            background: #ffffff;
+            padding: 1rem;
             border-radius: 6px;
+            border: 1px solid #bfdbfe;
             font-size: 0.9rem;
-            color: var(--text-muted);
-            background: #f8fafc;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .generated-link:hover {
+            text-decoration: underline;
         }
 
         .btn-copy {
             background: var(--brand-color);
             color: white;
             border: none;
-            padding: 0 1rem;
+            padding: 0.75rem;
             border-radius: 6px;
             cursor: pointer;
             font-weight: 600;
             transition: background 0.2s;
+            text-align: center;
         }
 
         .btn-copy:hover {
@@ -152,19 +170,18 @@
         }
 
         /* =========================================
-           VIEW 2: MOCK E-COMMERCE WEBSITE 
+           VIEW 2: MOCK E-COMMERCE WEBSITE
            ========================================= */
-        #mock-website-view {
+        #mock-view {
             display: none;
             flex-direction: column;
             width: 100%;
         }
 
-        /* Fake Store Header */
-        .store-header {
+        .store-nav {
             background-color: var(--brand-color);
             color: white;
-            padding: 1rem 5%;
+            padding: 1.2rem 5%;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -172,80 +189,73 @@
         }
 
         .store-logo {
-            font-size: 1.5rem;
+            font-size: 1.4rem;
             font-weight: 700;
-            display: flex;
-            align-items: center;
-            gap: 10px;
+            letter-spacing: 0.5px;
         }
 
-        .store-nav {
+        .nav-links {
             display: flex;
             gap: 2rem;
         }
 
-        .store-nav a {
-            color: #cbd5e1;
+        .nav-links a {
+            color: #94a3b8;
             text-decoration: none;
             font-size: 0.95rem;
             font-weight: 500;
         }
 
-        .store-nav a.active {
-            color: white;
+        .nav-links a.active {
+            color: #ffffff;
             border-bottom: 2px solid var(--brand-accent);
-            padding-bottom: 4px;
+            padding-bottom: 5px;
         }
 
-        /* Mobile adjustments for Mock Nav */
         @media (max-width: 600px) {
-            .store-nav { display: none; } /* Hide links on mobile to save space */
+            .nav-links { display: none; }
         }
 
-        /* Fake Store Content Area */
-        .store-main {
-            max-width: 1200px;
+        .store-body {
+            max-width: 1000px;
             margin: 3rem auto;
             padding: 0 1.5rem;
             width: 100%;
         }
 
-        .page-title {
+        .page-header {
             text-align: center;
             margin-bottom: 2rem;
         }
 
-        .page-title h2 {
-            font-size: 2rem;
+        .page-header h2 {
+            font-size: 2.2rem;
             color: var(--brand-color);
             margin-bottom: 0.5rem;
         }
 
-        .page-title p {
+        .page-header p {
             color: var(--text-muted);
+            font-size: 1.1rem;
         }
 
-        .widget-wrapper {
+        .tracker-container {
             background: #ffffff;
             border: 1px solid #e2e8f0;
             border-radius: 12px;
-            padding: 1rem;
+            padding: 1.5rem;
             box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
-            min-height: 500px;
-            display: flex;
-            flex-direction: column;
-            margin: 0 auto;
-            max-width: 900px;
+            min-height: 400px;
         }
 
-        .widget-wrapper iframe {
+        .tracker-container iframe {
             width: 100%;
-            min-height: 600px;
+            min-height: 500px;
             border: none;
         }
 
         /* =========================================
-           FIXED FOOTER 
+           FIXED FOOTER
            ========================================= */
         footer {
             position: fixed;
@@ -254,54 +264,60 @@
             width: 100%;
             background-color: #ffffff;
             border-top: 1px solid #e2e8f0;
-            padding: 1.2rem 0;
+            padding: 1rem 0;
             text-align: center;
             font-size: 0.95rem;
             font-weight: 600;
             color: var(--text-muted);
             z-index: 1000;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.03);
         }
     </style>
 </head>
 <body>
 
-    <div id="setup-view">
-        <div class="setup-card">
-            <h1>Create Tracker Link</h1>
-            <p>Paste your DT Order Tracker code to generate a shareable mobile testing link.</p>
-            <textarea id="widgetInput" placeholder=""></textarea>
-            <button id="generateBtn" class="btn-primary">Generate Shareable URL</button>
+    <div id="landing-view">
+        <div class="config-card">
+            <h1>DT Widget Setup</h1>
+            <p class="subtitle">Enter your widget code below to create a shareable mock website link.</p>
             
-            <div id="url-result">
-                <label>Your Testing Link:</label>
-                <div class="url-box">
-                    <input type="text" id="generatedUrl" readonly>
-                    <button class="btn-copy" id="copyBtn">Copy</button>
+            <label for="widgetInput">Widget Code (HTML/Iframe)</label>
+            <textarea id="widgetInput" placeholder="<iframe src='...'></iframe>"></textarea>
+            
+            <button id="generateBtn" class="btn-generate">Generate URL</button>
+            
+            <div id="result-box">
+                <h3>Success! Here is your shareable link:</h3>
+                <p style="font-size: 0.85rem; color: #64748b; margin-bottom: 10px;">
+                    Click the link to test it now, or copy it to send to a mobile device.
+                </p>
+                <div class="link-container">
+                    <a id="clickableLink" class="generated-link" href="#" target="_blank"></a>
+                    <button id="copyBtn" class="btn-copy">Copy Link to Clipboard</button>
                 </div>
             </div>
         </div>
     </div>
 
-    <div id="mock-website-view">
-        <header class="store-header">
-            <div class="store-logo">🛍️ Nexus Store</div>
-            <nav class="store-nav">
+    <div id="mock-view">
+        <nav class="store-nav">
+            <div class="store-logo">Premium Store</div>
+            <div class="nav-links">
                 <a href="#">Home</a>
-                <a href="#">Shop</a>
+                <a href="#">Products</a>
                 <a href="#" class="active">Track Order</a>
-                <a href="#">Support</a>
-            </nav>
-        </header>
+                <a href="#">Contact Us</a>
+            </div>
+        </nav>
 
-        <main class="store-main">
-            <div class="page-title">
-                <h2>Track Your Package</h2>
-                <p>Enter your tracking details below for real-time updates.</p>
+        <div class="store-body">
+            <div class="page-header">
+                <h2>Track Your Order</h2>
+                <p>Enter your tracking number below to see live shipping updates.</p>
             </div>
             
-            <div class="widget-wrapper" id="widgetContainer">
-                </div>
-        </main>
+            <div class="tracker-container" id="trackerDisplay"></div>
+        </div>
     </div>
 
     <footer>
@@ -310,56 +326,71 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            const setupView = document.getElementById('setup-view');
-            const mockWebsiteView = document.getElementById('mock-website-view');
-            
-            // Check the URL for existing widget code when the page loads
-            const urlParams = new URLSearchParams(window.location.search);
-            const encodedWidget = urlParams.get('dtcode');
+            const landingView = document.getElementById('landing-view');
+            const mockView = document.getElementById('mock-view');
+            const trackerDisplay = document.getElementById('trackerDisplay');
 
-            if (encodedWidget) {
-                // If there is code in the URL, we are in "Viewer Mode"
-                setupView.style.display = 'none';
-                mockWebsiteView.style.display = 'flex';
+            // 1. CHECK URL ON LOAD
+            // We use window.location.hash (e.g., #code=...) because it is much safer 
+            // for static files and GitHub pages than standard query parameters.
+            const currentHash = window.location.hash;
+
+            if (currentHash && currentHash.startsWith('#dtcode=')) {
+                // We are in Viewer Mode!
+                landingView.style.display = 'none';
+                mockView.style.display = 'flex';
                 
                 try {
-                    // Decode the Base64 string back into HTML
-                    const decodedCode = decodeURIComponent(atob(encodedWidget));
-                    document.getElementById('widgetContainer').innerHTML = decodedCode;
-                } catch (e) {
-                    document.getElementById('widgetContainer').innerHTML = '<p style="text-align:center; color:red;">Error loading widget. The link might be broken.</p>';
+                    // Extract the base64 string after '#dtcode='
+                    const encodedCode = currentHash.substring(8);
+                    // Decode it back into standard HTML
+                    const decodedCode = decodeURIComponent(atob(encodedCode));
+                    // Inject into the mock website
+                    trackerDisplay.innerHTML = decodedCode;
+                } catch (error) {
+                    trackerDisplay.innerHTML = '<p style="color:red; text-align:center; padding: 2rem;">Error: Invalid or broken tracking link.</p>';
                 }
             } else {
-                // Otherwise, we are in "Generator Mode"
+                // 2. GENERATOR MODE
+                // If there's no code in the URL, we show the landing page
                 const generateBtn = document.getElementById('generateBtn');
                 const widgetInput = document.getElementById('widgetInput');
-                const urlResult = document.getElementById('url-result');
-                const generatedUrlInput = document.getElementById('generatedUrl');
+                const resultBox = document.getElementById('result-box');
+                const clickableLink = document.getElementById('clickableLink');
                 const copyBtn = document.getElementById('copyBtn');
 
                 generateBtn.addEventListener('click', () => {
                     const code = widgetInput.value.trim();
                     if (!code) {
-                        alert('Please paste your tracking widget code first.');
+                        alert('Please enter the widget code first.');
                         return;
                     }
 
-                    // Encode the HTML string to Base64 to make it safe for URLs
-                    const encodedHTML = btoa(encodeURIComponent(code));
+                    // Compress and encode the HTML into a safe base64 string
+                    const safeBase64 = btoa(encodeURIComponent(code));
                     
-                    // Build the shareable URL
+                    // Construct the final shareable URL using the current domain/path
+                    // and appending our hash payload.
                     const baseUrl = window.location.origin + window.location.pathname;
-                    const shareableUrl = `${baseUrl}?dtcode=${encodedHTML}`;
+                    const finalUrl = `${baseUrl}#dtcode=${safeBase64}`;
                     
-                    generatedUrlInput.value = shareableUrl;
-                    urlResult.style.display = 'block';
+                    // Update the UI
+                    clickableLink.href = finalUrl;
+                    clickableLink.textContent = finalUrl;
+                    resultBox.style.display = 'block';
+                    
+                    // Reset copy button text if it was previously clicked
+                    copyBtn.textContent = 'Copy Link to Clipboard';
                 });
 
+                // Copy button functionality
                 copyBtn.addEventListener('click', () => {
-                    generatedUrlInput.select();
-                    document.execCommand('copy');
-                    copyBtn.innerText = 'Copied!';
-                    setTimeout(() => copyBtn.innerText = 'Copy', 2000);
+                    const urlToCopy = clickableLink.href;
+                    navigator.clipboard.writeText(urlToCopy).then(() => {
+                        copyBtn.textContent = '✅ Copied!';
+                    }).catch(err => {
+                        alert('Failed to copy. Please manually select the link and copy it.');
+                    });
                 });
             }
         });
