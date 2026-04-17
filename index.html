@@ -1,399 +1,667 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Order Tracker Configurator</title>
+    <title>Revanth's Tools Dashboard</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
     <style>
-        /* Base Variables & Reset */
+        /* CSS Variables & RGB definitions for Glassmorphism */
         :root {
-            --brand-color: #0f172a;
-            --brand-accent: #2563eb;
-            --bg-light: #f1f5f9;
-            --text-dark: #1e293b;
-            --text-muted: #64748b;
+            --font-main: 'Plus Jakarta Sans', sans-serif;
+            --transition-smooth: all 0.5s cubic-bezier(0.25, 0.8, 0.25, 1);
+            --transition-bounce: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
 
+        /* Dark Theme (Default & Premium looking) */
+        [data-theme="dark"] {
+            --bg-base: #030712;
+            --text-primary: #f9fafb;
+            --text-secondary: #9ca3af;
+            --card-bg-rgb: 17, 24, 39;
+            --card-border: rgba(255, 255, 255, 0.08);
+            --accent-primary: #6366f1;
+            --accent-secondary: #a855f7;
+            --glow-1: #4f46e5;
+            --glow-2: #c026d3;
+            --header-bg: rgba(3, 7, 18, 0.6);
+        }
+
+        /* Light Theme (Clean & Crisp) */
+        [data-theme="light"] {
+            --bg-base: #f8fafc;
+            --text-primary: #0f172a;
+            --text-secondary: #475569;
+            --card-bg-rgb: 255, 255, 255;
+            --card-border: rgba(0, 0, 0, 0.08);
+            --accent-primary: #4f46e5;
+            --accent-secondary: #9333ea;
+            --glow-1: #818cf8;
+            --glow-2: #e879f9;
+            --header-bg: rgba(248, 250, 252, 0.6);
+        }
+
+        /* Reset */
         * {
-            box-sizing: border-box;
             margin: 0;
             padding: 0;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            box-sizing: border-box;
+            font-family: var(--font-main);
         }
 
         body {
-            background-color: var(--bg-light);
-            color: var(--text-dark);
-            padding-bottom: 70px; /* Prevents content from hiding behind footer */
+            background-color: var(--bg-base);
+            color: var(--text-primary);
             min-height: 100vh;
             display: flex;
             flex-direction: column;
+            overflow-x: hidden;
+            position: relative;
+            transition: background-color 0.5s ease, color 0.5s ease;
         }
 
-        /* =========================================
-           VIEW 1: LANDING PAGE (Generate URL)
-           ========================================= */
-        #landing-view {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-grow: 1;
-            padding: 2rem;
-            background: linear-gradient(135deg, #e2e8f0 0%, #f8fafc 100%);
+        /* --- Ambient Background Glows --- */
+        .ambient-glow {
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(120px);
+            z-index: -1;
+            opacity: 0.4;
+            animation: float 15s infinite ease-in-out alternate;
         }
 
-        .config-card {
-            background: #ffffff;
+        .glow-1 {
+            top: -10%;
+            left: -10%;
+            width: 50vw;
+            height: 50vw;
+            background: var(--glow-1);
+        }
+
+        .glow-2 {
+            bottom: -10%;
+            right: -10%;
+            width: 40vw;
+            height: 40vw;
+            background: var(--glow-2);
+            animation-delay: -5s;
+        }
+
+        @keyframes float {
+            0% { transform: translate(0, 0) scale(1); }
+            100% { transform: translate(10%, 10%) scale(1.1); }
+        }
+
+        /* --- Header --- */
+        header {
+            position: fixed;
+            top: 0;
             width: 100%;
-            max-width: 650px;
-            padding: 2.5rem;
-            border-radius: 12px;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
-        }
-
-        .config-card h1 {
-            font-size: 1.8rem;
-            margin-bottom: 0.5rem;
-            color: var(--brand-color);
-            text-align: center;
-        }
-
-        .config-card p.subtitle {
-            color: var(--text-muted);
-            margin-bottom: 2rem;
-            text-align: center;
-            font-size: 0.95rem;
-        }
-
-        label {
-            font-weight: 600;
-            font-size: 0.95rem;
-            display: block;
-            margin-bottom: 0.5rem;
-        }
-
-        textarea {
-            width: 100%;
-            height: 160px;
-            padding: 1rem;
-            border: 2px solid #e2e8f0;
-            border-radius: 8px;
-            font-family: monospace;
-            font-size: 0.9rem;
-            resize: vertical;
-            margin-bottom: 1.5rem;
-            transition: border-color 0.2s;
-            background-color: #f8fafc;
-        }
-
-        textarea:focus {
-            outline: none;
-            border-color: var(--brand-accent);
-            background-color: #ffffff;
-        }
-
-        .btn-generate {
-            background-color: var(--brand-accent);
-            color: white;
-            border: none;
-            padding: 1rem 2rem;
-            font-size: 1.1rem;
-            font-weight: 600;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: background 0.2s, transform 0.1s;
-            width: 100%;
-            display: block;
-        }
-
-        .btn-generate:hover {
-            background-color: #1d4ed8;
-        }
-
-        .btn-generate:active {
-            transform: scale(0.98);
-        }
-
-        /* Result Box styling */
-        #result-box {
-            display: none;
-            margin-top: 2rem;
-            padding: 1.5rem;
-            background-color: #eff6ff;
-            border: 1px solid #bfdbfe;
-            border-radius: 8px;
-        }
-
-        #result-box h3 {
-            color: #1e3a8a;
-            font-size: 1rem;
-            margin-bottom: 0.5rem;
-        }
-
-        .link-container {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-
-        /* The actual clickable link */
-        .generated-link {
-            word-break: break-all;
-            color: var(--brand-accent);
-            background: #ffffff;
-            padding: 1rem;
-            border-radius: 6px;
-            border: 1px solid #bfdbfe;
-            font-size: 0.9rem;
-            text-decoration: none;
-            font-weight: 500;
-        }
-
-        .generated-link:hover {
-            text-decoration: underline;
-        }
-
-        .btn-copy {
-            background: var(--brand-color);
-            color: white;
-            border: none;
-            padding: 0.75rem;
-            border-radius: 6px;
-            cursor: pointer;
-            font-weight: 600;
-            transition: background 0.2s;
-            text-align: center;
-        }
-
-        .btn-copy:hover {
-            background: #1e293b;
-        }
-
-        /* =========================================
-           VIEW 2: MOCK E-COMMERCE WEBSITE
-           ========================================= */
-        #mock-view {
-            display: none;
-            flex-direction: column;
-            width: 100%;
-        }
-
-        .store-nav {
-            background-color: var(--brand-color);
-            color: white;
-            padding: 1.2rem 5%;
+            z-index: 100;
+            background: var(--header-bg);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-bottom: 1px solid var(--card-border);
+            padding: 1rem 5%;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
         }
 
-        .store-logo {
-            font-size: 1.4rem;
-            font-weight: 700;
-            letter-spacing: 0.5px;
-        }
-
-        .nav-links {
+        .logo {
+            font-size: 1.25rem;
+            font-weight: 800;
+            letter-spacing: -0.5px;
             display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .logo-icon {
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-size: 1.5rem;
+        }
+
+        .theme-toggle {
+            background: rgba(var(--card-bg-rgb), 0.5);
+            border: 1px solid var(--card-border);
+            color: var(--text-primary);
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            transition: var(--transition-bounce);
+            backdrop-filter: blur(8px);
+        }
+
+        .theme-toggle:hover {
+            transform: scale(1.1) rotate(15deg);
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 20px rgba(99, 102, 241, 0.3);
+        }
+
+        /* --- Hero Section --- */
+        .hero {
+            margin-top: 100px;
+            padding: 4rem 5% 2rem;
+            text-align: center;
+        }
+
+        .hero-badge {
+            display: inline-block;
+            padding: 0.5rem 1.25rem;
+            background: rgba(var(--card-bg-rgb), 0.4);
+            border: 1px solid var(--card-border);
+            border-radius: 100px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: 1.5rem;
+            backdrop-filter: blur(8px);
+            animation: slideDown 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+            opacity: 0;
+            transform: translateY(-20px);
+        }
+
+        .hero h1 {
+            font-size: clamp(2.5rem, 6vw, 4.5rem);
+            font-weight: 800;
+            line-height: 1.1;
+            margin-bottom: 1.5rem;
+            letter-spacing: -1px;
+            animation: slideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.1s forwards;
+            opacity: 0;
+            transform: translateY(30px);
+        }
+
+        .text-gradient {
+            background: linear-gradient(to right, var(--accent-primary), var(--accent-secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero p {
+            font-size: 1.125rem;
+            color: var(--text-secondary);
+            max-width: 600px;
+            margin: 0 auto;
+            line-height: 1.6;
+            animation: slideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.2s forwards;
+            opacity: 0;
+            transform: translateY(30px);
+        }
+
+        /* --- Main Grid --- */
+        main {
+            flex: 1;
+            padding: 2rem 5% 5rem;
+            max-width: 1200px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
             gap: 2rem;
         }
 
-        .nav-links a {
-            color: #94a3b8;
+        /* --- Glassmorphism Cards --- */
+        .card {
+            background: rgba(var(--card-bg-rgb), 0.6);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--card-border);
+            border-radius: 24px;
+            padding: 2.5rem 2rem;
             text-decoration: none;
-            font-size: 0.95rem;
-            font-weight: 500;
+            color: inherit;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            overflow: hidden;
+            transition: var(--transition-smooth);
+            opacity: 0;
+            transform: translateY(40px);
+            animation: fadeUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
         }
 
-        .nav-links a.active {
-            color: #ffffff;
-            border-bottom: 2px solid var(--brand-accent);
-            padding-bottom: 5px;
-        }
+        /* Staggered entrance animations */
+        .card:nth-child(1) { animation-delay: 0.3s; }
+        .card:nth-child(2) { animation-delay: 0.4s; }
+        .card:nth-child(3) { animation-delay: 0.5s; }
+        .card:nth-child(4) { animation-delay: 0.6s; }
+        .card:nth-child(5) { animation-delay: 0.7s; }
+        .card:nth-child(6) { animation-delay: 0.8s; }
+        .card:nth-child(7) { animation-delay: 0.9s; }
+        .card:nth-child(8) { animation-delay: 1.0s; }
+        .card:nth-child(9) { animation-delay: 1.1s; }
+        .card:nth-child(10) { animation-delay: 1.2s; }
+        .card:nth-child(11) { animation-delay: 1.3s; }
+        .card:nth-child(12) { animation-delay: 1.4s; }
+        .card:nth-child(13) { animation-delay: 1.5s; }
 
-        @media (max-width: 600px) {
-            .nav-links { display: none; }
-        }
-
-        .store-body {
-            max-width: 1000px;
-            margin: 3rem auto;
-            padding: 0 1.5rem;
-            width: 100%;
-        }
-
-        .page-header {
-            text-align: center;
-            margin-bottom: 2rem;
-        }
-
-        .page-header h2 {
-            font-size: 2.2rem;
-            color: var(--brand-color);
-            margin-bottom: 0.5rem;
-        }
-
-        .page-header p {
-            color: var(--text-muted);
-            font-size: 1.1rem;
-        }
-
-        .tracker-container {
-            background: #ffffff;
-            border: 1px solid #e2e8f0;
-            border-radius: 12px;
-            padding: 1.5rem;
-            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
-            min-height: 400px;
-        }
-
-        .tracker-container iframe {
-            width: 100%;
-            min-height: 500px;
-            border: none;
-        }
-
-        /* =========================================
-           FIXED FOOTER
-           ========================================= */
-        footer {
-            position: fixed;
-            bottom: 0;
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
             left: 0;
             width: 100%;
-            background-color: #ffffff;
-            border-top: 1px solid #e2e8f0;
-            padding: 1rem 0;
-            text-align: center;
-            font-size: 0.95rem;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0));
+            opacity: 0;
+            transition: var(--transition-smooth);
+            z-index: 0;
+        }
+
+        .card:hover {
+            transform: translateY(-10px) scale(1.02);
+            border-color: rgba(99, 102, 241, 0.4);
+            box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.3), 
+                        0 0 30px -5px rgba(99, 102, 241, 0.2);
+        }
+
+        .card:hover::before {
+            opacity: 1;
+        }
+
+        .card-content {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        .icon-box {
+            width: 64px;
+            height: 64px;
+            border-radius: 18px;
+            background: linear-gradient(135deg, rgba(var(--card-bg-rgb), 0.8), rgba(var(--card-bg-rgb), 0.2));
+            border: 1px solid var(--card-border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            margin-bottom: 2rem;
+            color: var(--accent-primary);
+            transition: var(--transition-bounce);
+            box-shadow: 0 8px 16px -4px rgba(0,0,0,0.1);
+        }
+
+        .card:hover .icon-box {
+            transform: scale(1.1) rotate(-10deg);
+            background: var(--accent-primary);
+            color: white;
+            border-color: transparent;
+        }
+
+        .card h2 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            letter-spacing: -0.5px;
+        }
+
+        .card p {
+            color: var(--text-secondary);
+            line-height: 1.7;
+            margin-bottom: 2.5rem;
+            flex-grow: 1;
+            font-size: 1.05rem;
+        }
+
+        .card-action {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
             font-weight: 600;
-            color: var(--text-muted);
-            z-index: 1000;
-            box-shadow: 0 -2px 10px rgba(0,0,0,0.03);
+            color: var(--text-primary);
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--card-border);
+            transition: var(--transition-smooth);
+        }
+
+        .action-text {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .action-arrow {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: rgba(var(--card-bg-rgb), 0.8);
+            border: 1px solid var(--card-border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition-bounce);
+        }
+
+        .card:hover .action-arrow {
+            background: var(--text-primary);
+            color: var(--bg-base);
+            transform: translateX(5px);
+        }
+
+        .card:hover .card-action {
+            color: var(--accent-primary);
+        }
+
+        /* Coming Soon Specifics */
+        .card.disabled {
+            cursor: not-allowed;
+            border-style: dashed;
+        }
+
+        .card.disabled:hover {
+            transform: none;
+            border-color: var(--card-border);
+            box-shadow: none;
+        }
+
+        .card.disabled:hover .icon-box {
+            transform: none;
+            background: linear-gradient(135deg, rgba(var(--card-bg-rgb), 0.8), rgba(var(--card-bg-rgb), 0.2));
+            color: var(--text-secondary);
+            border-color: var(--card-border);
+        }
+
+        .card.disabled .action-arrow {
+            opacity: 0.5;
+        }
+
+        /* --- Footer --- */
+        footer {
+            text-align: center;
+            padding: 2rem 5%;
+            color: var(--text-secondary);
+            border-top: 1px solid var(--card-border);
+            background: rgba(var(--card-bg-rgb), 0.2);
+            backdrop-filter: blur(10px);
+        }
+
+        /* --- Animations --- */
+        @keyframes slideDown {
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes slideUp {
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes fadeUp {
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* --- Responsive --- */
+        @media (max-width: 768px) {
+            .hero h1 { font-size: 2.5rem; }
+            .grid { grid-template-columns: 1fr; }
+            .card { padding: 2rem 1.5rem; }
         }
     </style>
 </head>
 <body>
 
-    <div id="landing-view">
-        <div class="config-card">
-            <h1>DT Widget Setup</h1>
-            <p class="subtitle">Enter your widget code below to create a shareable mock website link.</p>
+    <div class="ambient-glow glow-1"></div>
+    <div class="ambient-glow glow-2"></div>
+
+    <header>
+        <div class="logo">
+            <i class="fa-solid fa-layer-group logo-icon"></i> 
+            <span>Revanth's Workspace</span>
+        </div>
+        <button class="theme-toggle" id="themeToggle" aria-label="Toggle Theme">
+            <i class="fa-solid fa-moon"></i>
+        </button>
+    </header>
+
+    <div class="hero">
+        <div class="hero-badge">System Architecture & Tooling</div>
+        <h1>Engineered for <br><span class="text-gradient">Efficiency</span></h1>
+        <p>A centralized, high-performance dashboard for web-based utility applications. Built to streamline complex data processing and global time management.</p>
+    </div>
+
+    <main>
+        <div class="grid">
             
-            <label for="widgetInput">Widget Code (HTML/Iframe)</label>
-            <textarea id="widgetInput" placeholder="<iframe src='...'></iframe>"></textarea>
-            
-            <button id="generateBtn" class="btn-generate">Generate URL</button>
-            
-            <div id="result-box">
-                <h3>Success! Here is your shareable link:</h3>
-                <p style="font-size: 0.85rem; color: #64748b; margin-bottom: 10px;">
-                    Click the link to test it now, or copy it to send to a mobile device.
-                </p>
-                <div class="link-container">
-                    <a id="clickableLink" class="generated-link" href="#" target="_blank"></a>
-                    <button id="copyBtn" class="btn-copy">Copy Link to Clipboard</button>
+            <a href="https://revanthabbati.github.io/FileConverter/" target="_blank" rel="noopener noreferrer" class="card">
+                <div class="card-content">
+                    <div class="icon-box">
+                        <i class="fa-solid fa-code"></i>
+                    </div>
+                    <h2>Data Formatter Pro</h2>
+                    <p>An advanced conversion utility to parse, convert, and beautify data between XML and JSON architectures with precision.</p>
+                    <div class="card-action">
+                        <span class="action-text">Launch Application</span>
+                        <div class="action-arrow"><i class="fa-solid fa-arrow-right"></i></div>
+                    </div>
+                </div>
+            </a>
+
+            <a href="https://revanthabbati.github.io/TimeZoneConverter/" target="_blank" rel="noopener noreferrer" class="card">
+                <div class="card-content">
+                    <div class="icon-box">
+                        <i class="fa-solid fa-globe"></i>
+                    </div>
+                    <h2>Time Converter</h2>
+                    <p>A synchronized time management engine for accurately calculating and translating global time zones for remote operations.</p>
+                    <div class="card-action">
+                        <span class="action-text">Launch Application</span>
+                        <div class="action-arrow"><i class="fa-solid fa-arrow-right"></i></div>
+                    </div>
+                </div>
+            </a>
+
+            <a href="https://revanthabbati.github.io/CharacterCount/" target="_blank" rel="noopener noreferrer" class="card">
+                <div class="card-content">
+                    <div class="icon-box">
+                        <i class="fa-solid fa-text-width"></i>
+                    </div>
+                    <h2>Text Metrics Analyzer</h2>
+                    <p>A precision utility to instantly calculate character counts, word density, and string metrics for optimal content formatting.</p>
+                    <div class="card-action">
+                        <span class="action-text">Launch Application</span>
+                        <div class="action-arrow"><i class="fa-solid fa-arrow-right"></i></div>
+                    </div>
+                </div>
+            </a>
+
+            <a href="https://revanthabbati.github.io/CallsTracker/" target="_blank" rel="noopener noreferrer" class="card">
+                <div class="card-content">
+                    <div class="icon-box">
+                        <i class="fa-solid fa-phone-volume"></i>
+                    </div>
+                    <h2>Call Metrics Tracker</h2>
+                    <p>A comprehensive tracking dashboard designed to log, monitor, and analyze telephonic data and communication workflows efficiently.</p>
+                    <div class="card-action">
+                        <span class="action-text">Launch Application</span>
+                        <div class="action-arrow"><i class="fa-solid fa-arrow-right"></i></div>
+                    </div>
+                </div>
+            </a>
+
+            <a href="https://revanthabbati.github.io/PayloadGenerator/" target="_blank" rel="noopener noreferrer" class="card">
+                <div class="card-content">
+                    <div class="icon-box">
+                        <i class="fa-solid fa-cubes"></i>
+                    </div>
+                    <h2>Dynamic Payload Engine</h2>
+                    <p>A robust development tool to construct, format, and generate complex structured data payloads for API integration and testing.</p>
+                    <div class="card-action">
+                        <span class="action-text">Launch Application</span>
+                        <div class="action-arrow"><i class="fa-solid fa-arrow-right"></i></div>
+                    </div>
+                </div>
+            </a>
+
+            <a href="https://revanthabbati.github.io/TicketsTracker/" target="_blank" rel="noopener noreferrer" class="card">
+                <div class="card-content">
+                    <div class="icon-box">
+                        <i class="fa-solid fa-list-check"></i>
+                    </div>
+                    <h2>Ticket Allocation Engine</h2>
+                    <p>An intelligent tracking system to seamlessly manage, assign, and monitor support tickets and task distribution across team members.</p>
+                    <div class="card-action">
+                        <span class="action-text">Launch Application</span>
+                        <div class="action-arrow"><i class="fa-solid fa-arrow-right"></i></div>
+                    </div>
+                </div>
+            </a>
+
+            <a href="https://revanthabbati.github.io/DTInternalDocuments/" target="_blank" rel="noopener noreferrer" class="card">
+                <div class="card-content">
+                    <div class="icon-box">
+                        <i class="fa-solid fa-folder-open"></i>
+                    </div>
+                    <h2>Internal Document Portal</h2>
+                    <p>A secure, centralized repository for navigating, accessing, and managing internal DT documentation and operational guidelines.</p>
+                    <div class="card-action">
+                        <span class="action-text">Launch Application</span>
+                        <div class="action-arrow"><i class="fa-solid fa-arrow-right"></i></div>
+                    </div>
+                </div>
+            </a>
+
+            <a href="https://revanthabbati.github.io/CSVEditor/" target="_blank" rel="noopener noreferrer" class="card">
+                <div class="card-content">
+                    <div class="icon-box">
+                        <i class="fa-solid fa-file-csv"></i>
+                    </div>
+                    <h2>Advanced CSV Studio</h2>
+                    <p>A powerful, interactive grid environment for parsing, editing, formatting, and managing tabular CSV datasets directly within the browser.</p>
+                    <div class="card-action">
+                        <span class="action-text">Launch Application</span>
+                        <div class="action-arrow"><i class="fa-solid fa-arrow-right"></i></div>
+                    </div>
+                </div>
+            </a>
+
+            <a href="https://revanthabbati.github.io/WeatherReport/" target="_blank" rel="noopener noreferrer" class="card">
+                <div class="card-content">
+                    <div class="icon-box">
+                        <i class="fa-solid fa-cloud-sun"></i>
+                    </div>
+                    <h2>Global Weather Insights</h2>
+                    <p>A real-time meteorological tracking utility delivering accurate, up-to-date forecasts and atmospheric data across global coordinates.</p>
+                    <div class="card-action">
+                        <span class="action-text">Launch Application</span>
+                        <div class="action-arrow"><i class="fa-solid fa-arrow-right"></i></div>
+                    </div>
+                </div>
+            </a>
+
+            <a href="https://revanthabbati.github.io/EMLViewer/" target="_blank" rel="noopener noreferrer" class="card">
+                <div class="card-content">
+                    <div class="icon-box">
+                        <i class="fa-solid fa-envelope-open-text"></i>
+                    </div>
+                    <h2>EML Inspection Engine</h2>
+                    <p>A specialized forensic and rendering tool to securely parse, visualize, and analyze raw EML files and email headers in the browser.</p>
+                    <div class="card-action">
+                        <span class="action-text">Launch Application</span>
+                        <div class="action-arrow"><i class="fa-solid fa-arrow-right"></i></div>
+                    </div>
+                </div>
+            </a>
+
+            <a href="https://revanthabbati.github.io/ImageDataExtracter/" target="_blank" rel="noopener noreferrer" class="card">
+                <div class="card-content">
+                    <div class="icon-box">
+                        <i class="fa-solid fa-file-image"></i>
+                    </div>
+                    <h2>Visual Metadata Extractor</h2>
+                    <p>A sophisticated image analysis utility designed to extract, inspect, and process embedded metadata and EXIF properties from visual assets.</p>
+                    <div class="card-action">
+                        <span class="action-text">Launch Application</span>
+                        <div class="action-arrow"><i class="fa-solid fa-arrow-right"></i></div>
+                    </div>
+                </div>
+            </a>
+
+            <a href="https://revanthabbati.github.io/OrderTracker/" target="_blank" rel="noopener noreferrer" class="card">
+                <div class="card-content">
+                    <div class="icon-box">
+                        <i class="fa-solid fa-truck-fast"></i>
+                    </div>
+                    <h2>Logistics Tracking Engine</h2>
+                    <p>A comprehensive supply chain utility to monitor, trace, and manage shipment lifecycles and order fulfillment in real-time.</p>
+                    <div class="card-action">
+                        <span class="action-text">Launch Application</span>
+                        <div class="action-arrow"><i class="fa-solid fa-arrow-right"></i></div>
+                    </div>
+                </div>
+            </a>
+
+            <div class="card disabled">
+                <div class="card-content">
+                    <div class="icon-box" style="color: var(--text-secondary);">
+                        <i class="fa-solid fa-microchip"></i>
+                    </div>
+                    <h2 style="color: var(--text-secondary);">Module In Queue</h2>
+                    <p>New utility algorithms are currently compiling in the development pipeline. Dashboard will auto-update upon deployment.</p>
+                    <div class="card-action" style="color: var(--text-secondary);">
+                        <span class="action-text"><i class="fa-solid fa-spinner fa-spin" style="margin-right: 5px;"></i> Developing</span>
+                        <div class="action-arrow" style="background: transparent; border: none;"><i class="fa-solid fa-lock"></i></div>
+                    </div>
                 </div>
             </div>
-        </div>
-    </div>
 
-    <div id="mock-view">
-        <nav class="store-nav">
-            <div class="store-logo">Premium Store</div>
-            <div class="nav-links">
-                <a href="#">Home</a>
-                <a href="#">Products</a>
-                <a href="#" class="active">Track Order</a>
-                <a href="#">Contact Us</a>
-            </div>
-        </nav>
-
-        <div class="store-body">
-            <div class="page-header">
-                <h2>Track Your Order</h2>
-                <p>Enter your tracking number below to see live shipping updates.</p>
-            </div>
-            
-            <div class="tracker-container" id="trackerDisplay"></div>
         </div>
-    </div>
+    </main>
 
     <footer>
-        Developed by Revanth Reddy Abbati
+        <p>&copy; <span id="year"></span> Revanth Reddy Abbati. Deployed and live.</p>
     </footer>
 
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const landingView = document.getElementById('landing-view');
-            const mockView = document.getElementById('mock-view');
-            const trackerDisplay = document.getElementById('trackerDisplay');
+        // Set dynamic year
+        document.getElementById('year').textContent = new Date().getFullYear();
 
-            // 1. CHECK URL ON LOAD
-            // We use window.location.hash (e.g., #code=...) because it is much safer 
-            // for static files and GitHub pages than standard query parameters.
-            const currentHash = window.location.hash;
+        // Theme Toggling Logic
+        const themeBtn = document.getElementById('themeToggle');
+        const themeIcon = themeBtn.querySelector('i');
+        const htmlDoc = document.documentElement;
 
-            if (currentHash && currentHash.startsWith('#dtcode=')) {
-                // We are in Viewer Mode!
-                landingView.style.display = 'none';
-                mockView.style.display = 'flex';
-                
-                try {
-                    // Extract the base64 string after '#dtcode='
-                    const encodedCode = currentHash.substring(8);
-                    // Decode it back into standard HTML
-                    const decodedCode = decodeURIComponent(atob(encodedCode));
-                    // Inject into the mock website
-                    trackerDisplay.innerHTML = decodedCode;
-                } catch (error) {
-                    trackerDisplay.innerHTML = '<p style="color:red; text-align:center; padding: 2rem;">Error: Invalid or broken tracking link.</p>';
-                }
-            } else {
-                // 2. GENERATOR MODE
-                // If there's no code in the URL, we show the landing page
-                const generateBtn = document.getElementById('generateBtn');
-                const widgetInput = document.getElementById('widgetInput');
-                const resultBox = document.getElementById('result-box');
-                const clickableLink = document.getElementById('clickableLink');
-                const copyBtn = document.getElementById('copyBtn');
-
-                generateBtn.addEventListener('click', () => {
-                    const code = widgetInput.value.trim();
-                    if (!code) {
-                        alert('Please enter the widget code first.');
-                        return;
-                    }
-
-                    // Compress and encode the HTML into a safe base64 string
-                    const safeBase64 = btoa(encodeURIComponent(code));
-                    
-                    // Construct the final shareable URL using the current domain/path
-                    // and appending our hash payload.
-                    const baseUrl = window.location.origin + window.location.pathname;
-                    const finalUrl = `${baseUrl}#dtcode=${safeBase64}`;
-                    
-                    // Update the UI
-                    clickableLink.href = finalUrl;
-                    clickableLink.textContent = finalUrl;
-                    resultBox.style.display = 'block';
-                    
-                    // Reset copy button text if it was previously clicked
-                    copyBtn.textContent = 'Copy Link to Clipboard';
-                });
-
-                // Copy button functionality
-                copyBtn.addEventListener('click', () => {
-                    const urlToCopy = clickableLink.href;
-                    navigator.clipboard.writeText(urlToCopy).then(() => {
-                        copyBtn.textContent = '✅ Copied!';
-                    }).catch(err => {
-                        alert('Failed to copy. Please manually select the link and copy it.');
-                    });
-                });
+        const initTheme = () => {
+            const savedTheme = localStorage.getItem('revanth-theme');
+            if (savedTheme) {
+                htmlDoc.setAttribute('data-theme', savedTheme);
+                updateIcon(savedTheme);
             }
+        };
+
+        const updateIcon = (theme) => {
+            if (theme === 'dark') {
+                themeIcon.className = 'fa-solid fa-sun';
+            } else {
+                themeIcon.className = 'fa-solid fa-moon';
+            }
+        };
+
+        themeBtn.addEventListener('click', () => {
+            const currentTheme = htmlDoc.getAttribute('data-theme');
+            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+            
+            htmlDoc.setAttribute('data-theme', newTheme);
+            localStorage.setItem('revanth-theme', newTheme);
+            updateIcon(newTheme);
         });
+
+        initTheme();
     </script>
 </body>
 </html>
